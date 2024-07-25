@@ -1,47 +1,36 @@
-name: CodeQL Analysis
+name: CodeQL
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
-
-permissions:
-  contents: read
-  actions: write
-  security-events: write
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 1'
 
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ '.net' ]
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-    - name: Set up .NET
-      uses: actions/setup-dotnet@v3
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
       with:
-        dotnet-version: '6.x'
+        languages: ${{ matrix.language }}
 
-    - name: Set up CodeQL
-      uses: github/codeql-action/setup-codeql@v2
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
       with:
-        languages: csharp
-
-    - name: Build .NET project
-      run: dotnet build --no-restore
-
-    - name: Create CodeQL database
-      run: codeql database create codeql-db --language=cs --source-root=.
-
-    - name: Run CodeQL analysis
-      run: codeql database analyze codeql-db --format=sarifv2.1.0 --output=codeql-results.sarif
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload CodeQL results
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: codeql-results.sarif
+        category: '/language:${{ matrix.language }}'
