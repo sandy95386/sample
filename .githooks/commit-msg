@@ -1,0 +1,16 @@
+#!/bin/sh
+
+MSG_FILE=$1
+MSG=$(cat "$MSG_FILE")
+
+MIN_LENGTH=15
+
+if [ ${#MSG} -lt $MIN_LENGTH ]; then
+    echo "======================================"
+    echo "Commit message must be at least 15 characters."
+    echo "Current message: \"$MSG\""
+    echo "======================================"
+    exit 1
+fi
+
+exit 0
